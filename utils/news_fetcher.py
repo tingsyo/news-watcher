@@ -14,11 +14,11 @@ class NewsAlertFetcher:
     Saves an HTML report locally with a timestamp filename.
     """
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv("NEWS_API_KEY", "")
+        self.api_key = api_key or os.getenv("NEWS_API_KEY", "b889f85f891d49c4b5c2042b94ab3413")
 
     def fetch_news(self, keywords: List[str], time_span_hours: int = 72) -> List[Dict[str, Any]]:
         query = " OR ".join(keywords)
-        from_date = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=time_span_hours)).isoformat()
+        from_date = (datetime.datetime.now() - datetime.timedelta(hours=time_span_hours)).isoformat()
         
         if self.api_key:
             url = f"https://newsapi.org/v2/everything?q={query}&from={from_date}&sortBy=popularity&apiKey={self.api_key}"
@@ -34,7 +34,7 @@ class NewsAlertFetcher:
         return self._generate_sample_articles(keywords, time_span_hours)
 
     def rank_articles(self, articles: List[Dict[str, Any]], keywords: List[str], time_span_hours: int) -> List[Dict[str, Any]]:
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now()
         time_span_seconds = time_span_hours * 3600
         normalized_keywords = [k.strip().lower() for k in keywords if k.strip()]
         
@@ -75,8 +75,9 @@ class NewsAlertFetcher:
             temporal_score = max(0, 100 * (1 - hours_old / max(1, time_span_hours)))
 
             # 3. Popularity Score (0 - 100)
-            popularity_raw = art.get("popularity", 5000)
-            popularity_score = min(100, popularity_raw / 150)
+            #popularity_raw = art.get("popularity", 5000)
+            popularity_raw = articles.index(art)
+            popularity_score = (1 - (popularity_raw/len(articles)))*100
 
             # Final Composite Score
             composite_score = round(
@@ -152,7 +153,7 @@ class NewsAlertFetcher:
         return filepath, filename, html_content
 
     def _generate_sample_articles(self, keywords: List[str], time_span_hours: int) -> List[Dict[str, Any]]:
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now()
         return [
             {
                 "title": f"New Advances in {' and '.join(keywords[:2])} Transform Global Markets",
@@ -175,6 +176,8 @@ class NewsAlertFetcher:
 if __name__ == "__main__":
     fetcher = NewsAlertFetcher()
     raw = fetcher.fetch_news(["education", "AI", "technology", "economy"], time_span_hours=72)
+    print("RAW DATA: "+str(len(raw)))
     ranked = fetcher.rank_articles(raw, ["education", "AI", "technology", "economy"], time_span_hours=72)
+    print("RANKED DATA: "+str(len(ranked)))
     path, fname, _ = fetcher.generate_html_report(ranked, ["education", "AI", "technology", "economy"], 72, 24)
     print(f"Saved news alert report to {path}")
