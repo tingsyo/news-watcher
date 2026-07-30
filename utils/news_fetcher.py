@@ -179,8 +179,8 @@ class NewsAlertFetcher:
 if __name__ == "__main__":
     fetcher = NewsAlertFetcher()
     raw = fetcher.fetch_news(["education", "AI", "technology", "economy"], time_span_hours=72)
-    print("RAW DATA: "+str(len(raw)))
+    #print("RAW DATA: "+str(len(raw)))
     ranked = fetcher.rank_articles(raw, ["education", "AI", "technology", "economy"], time_span_hours=72)
-    print("RANKED DATA: "+str(len(ranked)))
+    #print("RANKED DATA: "+str(len(ranked)))
     path, fname, _ = fetcher.generate_html_report(ranked, ["education", "AI", "technology", "economy"], 72, 24)
-    print(f"Saved news alert report to {path}")
+    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S")+f"\tSaved news alert report to {path}")
