@@ -14,7 +14,7 @@ class NewsAlertFetcher:
     Saves an HTML report locally with a timestamp filename.
     """
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv("NEWS_API_KEY", "b889f85f891d49c4b5c2042b94ab3413")
+        self.api_key = api_key or os.getenv("NEWS_API_KEY", "")
 
     def fetch_news(self, keywords: List[str], time_span_hours: int = 72) -> List[Dict[str, Any]]:
         query = " OR ".join(keywords)
@@ -148,6 +148,9 @@ class NewsAlertFetcher:
         os.makedirs("reports", exist_ok=True)
         filepath = os.path.join("reports", filename)
         with open(filepath, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        # For publishing
+        with open('temp.html', "w", encoding="utf-8") as f:
             f.write(html_content)
 
         return filepath, filename, html_content
