@@ -2,6 +2,7 @@ import os
 import re
 import datetime
 import requests
+import tomllib
 from typing import List, Dict, Any
 
 class NewsAlertFetcher:
@@ -176,11 +177,18 @@ class NewsAlertFetcher:
             }
         ]
 
+#
 if __name__ == "__main__":
-    fetcher = NewsAlertFetcher()
+    # TOML files must be opened in binary mode ("rb")
+    with open("keys.toml", "rb") as f:
+        keys = tomllib.load(f)
+    # Get news articles through API
+    fetcher = NewsAlertFetcher(api_key=keys['NEWS_API_KEY'])
     raw = fetcher.fetch_news(["education", "AI", "technology", "economy"], time_span_hours=72)
     #print("RAW DATA: "+str(len(raw)))
+    # Ordering the articles
     ranked = fetcher.rank_articles(raw, ["AI","education","parenting", "school", "university"], time_span_hours=72)
     #print("RANKED DATA: "+str(len(ranked)))
+    # Output
     path, fname, _ = fetcher.generate_html_report(ranked, ["AI", "education", "parenting", "school", "university"], 72, 24)
     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+f"\tSaved news alert report to {path}")
